@@ -1,6 +1,6 @@
 import { Router } from "express"
 
-import { } from "../controllers/hotel.controller.js"
+import { registerHotel} from "../controllers/hotel.controller.js"
 
 const router = Router()
 

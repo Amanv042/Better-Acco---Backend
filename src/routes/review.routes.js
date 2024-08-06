@@ -1,9 +1,9 @@
-import { Router } from "express"
+import { Router } from "express";
 
-import { } from "../controllers/hotel.controller.js"
+import { addReview } from "../controllers/review.controller.js";
 
-const router = Router()
+const router = Router();
 
-router.route("/add-review").post(addReview)
+router.route("/add-review").post(addReview);
 
-export default router
+export default router;

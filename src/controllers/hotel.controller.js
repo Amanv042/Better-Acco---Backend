@@ -1,9 +1,8 @@
-import asyncHandler from "../utils/asyncHandler"
+import {asyncHandler} from "../utils/asyncHandler.js"
 
 
 const registerHotel = asyncHandler(async (req, res) => {
-    const { data } = req.body
-    console.log(data)
+    console.log(req.body)
 })
 
 

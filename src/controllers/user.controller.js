@@ -1,10 +1,7 @@
-import asyncHandler from "../utils/asyncHandler"
-
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const registerUser = asyncHandler(async (req, res) => {
-    const { data } = req.body
-    console.log(data)
-})
+  console.log(req.body);
+});
 
-
-export {registerUser} 
+export { registerUser };

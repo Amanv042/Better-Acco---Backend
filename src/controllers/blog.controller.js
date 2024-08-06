@@ -1,10 +1,7 @@
-import asyncHandler from "../utils/asyncHandler"
-
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const addBlog = asyncHandler(async (req, res) => {
-    const { data } = req.body
-    console.log(data)
-})
+  console.log(req.body);
+});
 
-
-export {addBlog} 
+export { addBlog };
