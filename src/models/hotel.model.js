@@ -78,3 +78,5 @@ const hotelSchema = new Schema(
   },
   { timestamps: true }
 );
+
+export const Hotel = mongoose.model("Hotel", hotelSchema);
