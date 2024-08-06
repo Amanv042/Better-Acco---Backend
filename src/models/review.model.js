@@ -10,7 +10,7 @@ const reviewSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Hotel",
     },
-    review: { type: String, require: true },
+    comment: { type: String, require: true },
     rating: { type: Number, require: true },
   },
   { timestamps: true }
