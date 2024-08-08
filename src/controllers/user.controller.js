@@ -1,9 +1,13 @@
+import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 import { User } from "../models/user.model.js";
+
+import { WEBSITE_DOMAIN } from "../constant.js";
 
 // Cookie options
 const cookieOptions = {
@@ -50,6 +54,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
   if (!user) throw new ApiError(404, "user does not exist");
   const validUser = await user.isPasswordCorrect(password);
+  
   if (!validUser) throw new ApiError(401, "Invalid user credentails");
 
   const accessToken = user.generateAccessToken();
@@ -76,7 +81,45 @@ const logoutUser = asyncHandler(async (_, res) => {
     .json(new ApiResponse(200, {}, "Logout successfully"));
 });
 
-const changePassword = asyncHandler(async (req, res) => {});
+const sendMailForChangePasswordWhenUserAuthenticated = asyncHandler(
+  async (req, res) => {
+    const user = await User.findById(req.user._id).select("-password");
+
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.USER_EMAIL,
+        pass: process.env.USER_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: "pubgm7309@gmail.com",
+      to: req.user.email,
+      subject: "Change Password",
+      html: `<a href="${WEBSITE_DOMAIN}/change-password/${user._id}">Click here to change password</a>`,
+    };
+
+    transporter.sendMail(mailOptions, (err) => {
+      if (err) console.log(err);
+    });
+
+    return res.status(200).json(new ApiResponse(200, {}, "Check your gmail"));
+  }
+);
+
+const changePassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const user = await User.findById(req.user._id);
+  const isPasswordCurrect = await user.isPasswordCorrect(oldPassword);
+  if (!isPasswordCurrect) throw new ApiError(400, "old password is wrong");
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password Change Successfully"));
+});
 
 const currentUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).select("-password");
@@ -134,6 +177,8 @@ export {
   registerUser,
   loginUser,
   logoutUser,
+  sendMailForChangePasswordWhenUserAuthenticated,
+  changePassword,
   currentUser,
   updateAccountDetails,
   updateAvatar,
