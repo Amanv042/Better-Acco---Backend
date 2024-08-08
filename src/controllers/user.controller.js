@@ -59,6 +59,7 @@ const loginUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .cookie("accessToken", accessToken, cookieOptions)
+    .setHeader("Autherization", `Bearer ${accessToken}`)
     .json(
       new ApiResponse(
         200,
@@ -68,4 +69,72 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerUser, loginUser };
+const logoutUser = asyncHandler(async (_, res) => {
+  return res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .json(new ApiResponse(200, {}, "Logout successfully"));
+});
+
+const changePassword = asyncHandler(async (req, res) => {});
+
+const currentUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select("-password");
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user,
+        `Current user fetched. user fullname ${user?.fullname}`
+      )
+    );
+});
+
+const updateAccountDetails = asyncHandler(async (req, res) => {
+  const data = req.body;
+  await User.findByIdAndUpdate(
+    req.user._id,
+    data,
+    {
+      $set: { ...data },
+    },
+    { new: true }
+  ).select("-password");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Account updated successfully"));
+});
+
+const updateAvatar = asyncHandler(async (req, res) => {
+  const avatarLocalPath = req.files?.avatar?.tempFilePath;
+
+  if (!avatarLocalPath) throw new ApiError(400, "Avatar image is required");
+
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+  if (!avatar?.url)
+    throw new ApiError(400, "Error while uploading image. try again");
+
+  await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: { avatar: avatar.url },
+    },
+    { new: true }
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Avatar update successfully"));
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  currentUser,
+  updateAccountDetails,
+  updateAvatar,
+};
