@@ -30,6 +30,7 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true,
     },
+    phone: { type: String, required: [true, "phone is required"] },
     password: { type: String, require: [true, "Password is required"] },
     avatar: {
       type: String,

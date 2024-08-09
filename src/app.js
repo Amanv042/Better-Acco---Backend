@@ -6,12 +6,7 @@ const app = express();
 
 // middleware
 // cors middleware settings
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true,
-  })
-);
+app.use(cors());
 
 // Express middleware to allow json configuration
 app.use(express.json({ limit: "16kb" }));

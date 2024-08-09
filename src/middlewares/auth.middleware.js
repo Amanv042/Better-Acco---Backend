@@ -7,7 +7,8 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
   // this underscore at the place of res that means its not in use
 
   try {
-    const accessToken = req.cookies?.accessToken;
+    const accessToken = req.headers.autherization?.replace("Bearer", "");
+
     if (!accessToken) throw new ApiError(401, "Unautherized User");
 
     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
