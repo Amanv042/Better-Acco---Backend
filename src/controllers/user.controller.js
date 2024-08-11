@@ -59,14 +59,15 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   const { data } = req.body;
   const formData = JSON.parse(data);
-  const { email, username, password } = formData;
+  const { login_id, password } = formData;
   // const { email, username, password } = req.body;
 
   try {
-    if (!(email || username))
-      throw new ApiError(400, "username or email is required");
+    if (!login_id) throw new ApiError(400, "username or email is required");
 
-    const user = await User.findOne({ $or: [{ username }, { email }] });
+    const user = await User.findOne({
+      $or: [{ username: login_id }, { email: login_id }],
+    });
 
     if (!user) throw new ApiError(404, "user does not exist");
     const validUser = await user.isPasswordCorrect(password);
@@ -160,21 +161,19 @@ const currentUser = asyncHandler(async (req, res) => {
     );
 });
 
-const updateAccountDetails = asyncHandler(async (req, res) => {
-  const data = req.body;
-  await User.findByIdAndUpdate(
-    req.user._id,
-    data,
-    {
-      $set: { ...data },
-    },
-    { new: true }
-  ).select("-password");
+const updateAccountDetails = async (req, res) => {
+  const { data } = req.body;
+  const formData = JSON.parse(data);
+  try {
+    await User.findByIdAndUpdate(req.user?._id, { ...formData }, { new: true });
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, {}, "Account updated successfully"));
-});
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Account updated successfully"));
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const updateAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.files?.avatar?.tempFilePath;

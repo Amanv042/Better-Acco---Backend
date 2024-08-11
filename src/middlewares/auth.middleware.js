@@ -1,9 +1,8 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
 
-export const verifyJWT = asyncHandler(async (req, _, next) => {
+export const verifyJWT = async (req, _, next) => {
   // this underscore at the place of res that means its not in use
 
   try {
@@ -24,4 +23,4 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
   } catch (error) {
     throw new ApiError(401, error?.message || "Invialid Access Token");
   }
-});
+};
