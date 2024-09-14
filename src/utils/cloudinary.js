@@ -7,11 +7,11 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloudinary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath,folderName) => {
   try {
     if (!localFilePath) return null;
     const result = await cloudinary.uploader.upload(localFilePath, {
-      folder: "Video Verse/images",
+      folder: `clgprojest/${folderName}`,
       resource_type: "auto",
     });
     fs.unlinkSync(localFilePath);

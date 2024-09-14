@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
+import { v2 as cloudinary } from "cloudinary";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -171,31 +172,45 @@ const updateAccountDetails = async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, {}, "Account updated successfully"));
   } catch (error) {
-    console.log(error);
+    return res
+      .status(error.statusCode)
+      .json(new ApiResponse(error.statusCode, {}, error.message));
   }
 };
 
 const updateAvatar = asyncHandler(async (req, res) => {
-  const avatarLocalPath = req.files?.avatar?.tempFilePath;
+  try {
+    const avatarLocalPath = req.files?.avatar?.tempFilePath;
 
-  if (!avatarLocalPath) throw new ApiError(400, "Avatar image is required");
+    if (!avatarLocalPath) throw new ApiError(400, "Avatar image is required");
 
-  const avatar = await uploadOnCloudinary(avatarLocalPath);
+    const avatar = await uploadOnCloudinary(avatarLocalPath, "user-avatar");
 
-  if (!avatar?.url)
-    throw new ApiError(400, "Error while uploading image. try again");
+    const userForDeleteImage = await User.findOne(req.user?._id);
 
-  await User.findByIdAndUpdate(
-    req.user?._id,
-    {
-      $set: { avatar: avatar.url },
-    },
-    { new: true }
-  );
+    if (userForDeleteImage.imagePath) {
+      await cloudinary.uploader.destroy(userForDeleteImage.imagePath);
+    }
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, {}, "Avatar update successfully"));
+    if (!avatar?.url)
+      throw new ApiError(400, "Error while uploading image. try again");
+
+    await User.findByIdAndUpdate(
+      req.user?._id,
+      {
+        $set: { avatar: avatar.url, imagePath: avatar.public_id },
+      },
+      { new: true }
+    );
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Avatar update successfully"));
+  } catch (error) {
+    return res
+      .status(error.statusCode)
+      .json(new ApiResponse(error.statusCode, {}, error.message));
+  }
 });
 
 export {

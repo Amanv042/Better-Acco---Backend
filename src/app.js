@@ -36,7 +36,7 @@ import reviewRouter from "./routes/review.routes.js";
 // using them as middleware
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/hotel", hotelRouter);
-app.use("/api/v1/hotel", blogRouter);
+app.use("/api/v1/blog", blogRouter);
 app.use("/api/v1/hotel", reviewRouter);
 
 export { app };
